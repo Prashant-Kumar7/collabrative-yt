@@ -43,7 +43,7 @@ export function TestApp() {
 
   useEffect(() => {
     // Create WebSocket connection
-    const newSocket = new WebSocket(`ws://localhost:8080`);
+    const newSocket = new WebSocket(`wss://coll-yt-ws.tumsab.xyz`);
 
     if(id){
       setRoomId(id)

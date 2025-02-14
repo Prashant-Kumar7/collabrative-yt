@@ -19,7 +19,7 @@ export function JoinRoomDialog({ isOpen, onClose }: JoinRoomDialogProps) {
   const handleJoinRoom = () => {
     console.log('Joining room with ID:', roomId)
     const token = localStorage.getItem("token")
-    axios.post("http://localhost:3000/api/v1/join-room", {roomId : roomId}, {
+    axios.post("https://coll-yt-backend.tumsab.xyz/api/v1/join-room", {roomId : roomId}, {
       headers : {
         Authorization : `baerer ${token}`
       }

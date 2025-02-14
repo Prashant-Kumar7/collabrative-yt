@@ -18,7 +18,7 @@ function SignUp() {
     if (name && email && password) {
       // Simulating an API call
 
-      await axios.post("http://localhost:3000/api/v1/signup", {username : name, email : email, password : password})
+      await axios.post("https://coll-yt-backend.tumsab.xyz/api/v1/signup", {username : name, email : email, password : password})
       navigate('/auth/signin');
       // setTimeout(() => {
       //   // Redirect to dashboard on successful registration

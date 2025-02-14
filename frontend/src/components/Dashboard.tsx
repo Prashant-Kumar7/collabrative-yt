@@ -22,7 +22,7 @@ export default function Dashboard() {
 
   useEffect(()=>{
     const token = localStorage.getItem("token")
-    axios.get("http://localhost:3000/api/v1/get-videos", {
+    axios.get("https://coll-yt-backend.tumsab.xyz/api/v1/get-videos", {
       headers : {
         Authorization : `Bearer ${token}`
       }
