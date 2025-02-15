@@ -34,7 +34,7 @@ export function CreateRoomDialog({ isOpen, onClose, videos }: CreateRoomDialogPr
   const handleCreateRoom = async() => {
     console.log('Creating room with:', { selectedVideo, permissions })
     const token = localStorage.getItem("token")
-    await axios.post("https://coll-yt-backend.tumsab.xyz/api/v1/create-room", {videoUrl : selectedVideo}, {
+    await axios.post("https://coll-yt-backend.tumsab.xyz/api/v1/create-room", {videoUrl : selectedVideo, permissions : permissions}, {
       headers : {
         Authorization : `baerer ${token}`
       }

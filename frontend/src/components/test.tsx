@@ -31,6 +31,10 @@ export function TestApp() {
   const [host, setHost] = useState(false)
   const [videoUrl, setVideoUrl] = useState("")
   const [toggle, setToggle] = useState(false)
+  const [permissions, setPermissions] = useState({
+    allowChat: false,
+    allowVideoControls: false,
+  })
   // const [roomState, setRoomState] = useState<RoomState>({
   //   paused : false,
   //   currentTime : 0
@@ -119,6 +123,11 @@ export function TestApp() {
             if(parsedMessage.userType === "HOST"){
               setHost(true)
             }
+
+            setPermissions({
+              allowChat : parsedMessage.allowChat,
+              allowVideoControls : parsedMessage.allowVideoControls
+            })
 
             // setMessages(state.messages)
             
@@ -244,7 +253,7 @@ export function TestApp() {
         onLoadedData={handlePlayerLoad}
         // onLoad={()=>console.log("video player loaded")}
         className="video w-full h-full bg-zinc-950"
-        controls={host}
+        controls={host || permissions.allowVideoControls}
         // controls
       />
         )}
@@ -270,7 +279,7 @@ export function TestApp() {
                 })}
               </div>
               <div className="row-span-11 border flex">
-                <input value={message} onChange={(e)=>{
+                <input disabled={host? false : permissions.allowChat? false : true} value={message} onChange={(e)=>{
                   setMessage(e.target.value)
                 }} className="w-full h-full pl-2 rounded-md" placeholder="enter text" type="text" />
                 <button onClick={handleSendMessage} className="p-1">send</button>

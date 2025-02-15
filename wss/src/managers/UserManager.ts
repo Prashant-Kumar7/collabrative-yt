@@ -41,7 +41,7 @@ export class UserManager {
     createRoom(message: string) {
         const parsedMessage = JSON.parse(message);
         const token = parsedMessage.roomToken;
-
+        const permissions = parsedMessage.permissions
         if (!token) {
             console.error("No room token provided");
             return;
@@ -51,7 +51,8 @@ export class UserManager {
             const payload = jwt.verify(token, secretKey);
             const username = payload.slice(0, payload.indexOf("_"));
             const videoUrl = payload.slice(payload.indexOf("_") + 1);
-            const room = new RoomManager(parsedMessage.roomId, username as string, videoUrl);
+            
+            const room = new RoomManager(parsedMessage.roomId, username as string, videoUrl, permissions);
             this.rooms.push(room);
         } catch (err) {
             console.error("JWT verification failed:", err);

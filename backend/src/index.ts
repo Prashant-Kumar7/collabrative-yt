@@ -253,7 +253,7 @@ app.post("/api/v1/signin" , async(req: Request , res: Response)=>{
 
 
 app.post("/api/v1/create-room", verifyTokenMiddleware , async(req: Request, res: Response)=>{
-    const {name, videoUrl} = await req.body
+    const {permissions, videoUrl} = await req.body
     const processId = crypto.randomUUID() + Date.now().toString()
     const sessionId = generateId()
     // const payload = `${sessionId}_${videoUrl}`
@@ -278,7 +278,7 @@ app.post("/api/v1/create-room", verifyTokenMiddleware , async(req: Request, res:
 
     const payload = `${userData?.username}_${videoUrl}`
         const roomToken: string = jwt.sign(payload, secretKey);
-        await redisClient.lPush("room", JSON.stringify({type: "CREATE",roomId : sessionId, roomToken : roomToken, processId : processId}))
+        await redisClient.lPush("room", JSON.stringify({type: "CREATE",roomId : sessionId, roomToken : roomToken, processId : processId, permissions : permissions}))
         res.json({
             roomToken : roomToken,
             roomId : sessionId

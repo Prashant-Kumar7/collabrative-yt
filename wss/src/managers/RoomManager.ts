@@ -18,15 +18,21 @@ interface Host {
     username : string
 }
 
+interface Permissions {
+    allowChat: boolean
+    allowVideoControls: boolean
+}
+
 export class RoomManager {
     private participants : Users[]
     public roomId : string
     private roomState : RoomState
     private currentTime : number
     private host : Host
+    private permissions : Permissions
     // private admin : WebSocket | null
 
-    constructor(roomId : string, username : string,videoUrl : string){
+    constructor(roomId : string, username : string,videoUrl : string, permissions : Permissions){
         this.participants = []
         this.roomId = roomId
         this.roomState = {
@@ -38,7 +44,8 @@ export class RoomManager {
         this.currentTime = 0
         this.host = {
             username : username
-        }
+        },
+        this.permissions = permissions
     }
 
     joinHttp(username : string){
@@ -97,9 +104,9 @@ export class RoomManager {
 
     getRoomState(socket: WebSocket){
         if(this.host.socket===socket){
-            socket.send(JSON.stringify({type : "ROOM_STATE", payload : this.roomState, userType : "HOST"}))
+            socket.send(JSON.stringify({type : "ROOM_STATE", payload : this.roomState, userType : "HOST", allowChat : this.permissions.allowChat, allowVideoControls: this.permissions.allowVideoControls}))
         }else {
-            socket.send(JSON.stringify({type : "ROOM_STATE", payload : this.roomState, userType : "PARTICIPANTS"}))
+            socket.send(JSON.stringify({type : "ROOM_STATE", payload : this.roomState, userType : "PARTICIPANTS", allowChat : this.permissions.allowChat, allowVideoControls: this.permissions.allowVideoControls}))
 
         }
     }
