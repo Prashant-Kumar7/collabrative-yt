@@ -58,7 +58,7 @@ export class RoomManager {
             this.host.socket = socket
             console.log("room state", this.roomState)
             this.participants.push({socket : this.host.socket, username : this.host.username})
-            socket.send(JSON.stringify({type : "VIDEO_URL", payload : this.roomState.videoUrl, username : this.host.username}))
+            socket.send(JSON.stringify({type : "VIDEO_URL", payload : this.roomState.videoUrl, username : username}))
         } else if(socket) {
             
             const user = this.participants.find((x)=>{
