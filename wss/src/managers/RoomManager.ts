@@ -168,7 +168,7 @@ export class RoomManager {
         }
         
         this.participants.forEach((user) => {
-            if (socket !== this.host.socket && message.payload > this.roomState.currentTime) {
+            if ( message.payload > this.roomState.currentTime) {
                 console.log(`Adjusting ${user.username} to current time: ${this.roomState.currentTime}`);
                 user.socket?.send(
                     JSON.stringify({
