@@ -198,7 +198,7 @@ export function TestApp() {
   };
 
   const handleSeek = () => {
-    if (socket && videoRef.current && host) {
+    if (socket && videoRef.current && (host || permissions.allowVideoControls)) {
       socket.send(
         JSON.stringify({
           type: "SEEKED",
