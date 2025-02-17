@@ -78,7 +78,8 @@ export class UserManager {
 
             try {
                 const payload = jwt.verify(token as string, secretKey);
-                const username = payload.slice(0, payload.indexOf("_")+1);
+                
+                const username = payload.slice(0, payload.indexOf("_"));
                 const room = this.rooms.find((rm) => rm.roomId === parsedMessage.roomId);
 
                 switch (parsedMessage.type) {
