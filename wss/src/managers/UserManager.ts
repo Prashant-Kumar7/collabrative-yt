@@ -49,7 +49,7 @@ export class UserManager {
 
         try {
             const payload = jwt.verify(token, secretKey);
-            const username = payload.slice(0, payload.indexOf("_")+1);
+            const username = payload.slice(0, payload.indexOf("_"));
             const videoUrl = payload.slice(payload.indexOf("_") + 1);
             
             const room = new RoomManager(parsedMessage.roomId, username as string, videoUrl, permissions);
