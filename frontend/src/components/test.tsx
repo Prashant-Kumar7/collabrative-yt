@@ -279,7 +279,6 @@ export function TestApp() {
         onPlay={handlePlay}
         onPause={handlePause}
         onSeeked={handleSeek}
-        muted
         onLoadedData={handlePlayerLoad}
         // onLoad={()=>console.log("video player loaded")}
         className="video w-full h-48 sm:h-full md:h-full bg-zinc-950"
