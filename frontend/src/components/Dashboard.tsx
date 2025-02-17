@@ -20,18 +20,18 @@ export default function Dashboard() {
   const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false)
   const [isJoinRoomDialogOpen, setIsJoinRoomDialogOpen] = useState(false)
 
-  useEffect(()=>{
+  useEffect(() => {
     const token = localStorage.getItem("token")
     axios.get("https://coll-yt-backend.tumsab.xyz/api/v1/get-videos", {
-      headers : {
-        Authorization : `Bearer ${token}`
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    }).then((res)=>{
+    }).then((res) => {
       setVideos(res.data.videos)
-    }).catch((err)=>{
+    }).catch((err) => {
       console.log(err)
     })
-  },[])
+  }, [])
 
   const handleVideoUpload = (video: Video) => {
     setVideos(prevVideos => [...prevVideos, video])
@@ -42,16 +42,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-screen h-screen mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Video Dashboard</h1>
-        <div className="flex gap-2">
+    <div className="w-screen min-h-screen px-4 py-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+        <h1 className="text-2xl font-bold text-center sm:text-left">Video Dashboard</h1>
+        <div className="flex flex-wrap justify-center gap-2">
           <VideoUpload onVideoUpload={handleVideoUpload} />
           <Button onClick={() => setIsCreateRoomDialogOpen(true)}>Create Room</Button>
           <Button onClick={() => setIsJoinRoomDialogOpen(true)}>Join Room</Button>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+
+      {/* Video Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {videos.map((video) => (
           <VideoCard key={video.id} video={video} onDelete={handleDeleteVideo} />
         ))}
@@ -61,6 +64,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Modals */}
       <CreateRoomDialog
         isOpen={isCreateRoomDialogOpen}
         onClose={() => setIsCreateRoomDialogOpen(false)}
@@ -73,4 +78,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

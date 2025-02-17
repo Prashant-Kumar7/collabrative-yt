@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import { Upload } from 'lucide-react'
 import axios from 'axios'
@@ -18,12 +18,16 @@ interface VideoUploadProps {
 
 export function VideoUpload({ onVideoUpload }: VideoUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [url, setUrl] = useState("")
+  const [url, setUrl] = useState<string>("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const generateThumbnail = (): Promise<string> => {
+  const generateThumbnail = (videoUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement('video')
       video.preload = 'metadata'
+      video.src = videoUrl
+      video.crossOrigin = "anonymous"
+
       video.onloadedmetadata = () => {
         video.currentTime = video.duration / 2
       }
@@ -39,49 +43,52 @@ export function VideoUpload({ onVideoUpload }: VideoUploadProps) {
           reject(new Error('Failed to get canvas context'))
         }
       }
-      video.onerror = () => {
-        reject(new Error('Failed to load video'))
-      }
-      video.src = url
+      video.onerror = () => reject(new Error('Failed to load video'))
     })
   }
+
+  useEffect(() => {
+    if (url && selectedFile) {
+      generateThumbnail(url)
+        .then(thumbnailUrl => {
+          onVideoUpload({ 
+            id: Date.now().toString(), // Generate a unique id
+            name: selectedFile.name, 
+            url: url, 
+            thumbnailUrl 
+          })
+          setUrl("")
+          setSelectedFile(null)
+        })
+        .catch(error => console.error('Thumbnail generation failed:', error))
+    }
+  }, [url, selectedFile, onVideoUpload])
 
   const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      setSelectedFile(file)
+
       try {
-        // const objectUrl = URL.createObjectURL(file)
         const formData = new FormData();
         formData.append("file", file);
-        await axios.post("http://localhost:3000/api/video/upload", formData, {
+        const response = await axios.post("http://localhost:3000/api/video/upload", formData, {
           headers: {
-              "Content-Type": "multipart/form-data",
-              "Authorization" : `Bearer ${localStorage.getItem("token")}`
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
           },
-        }).then((res)=>{
-          setUrl(res.data.fileUrl)
-        }).catch((err)=>{
-          console.log(err)
         })
-
-        const thumbnailUrl = await generateThumbnail()
-        onVideoUpload({ 
-          id: Date.now().toString(), // Generate a unique id
-          name: file.name, 
-          url: url, 
-          thumbnailUrl 
-        })
+        setUrl(response.data.fileUrl)
       } catch (error) {
-        console.error('Failed to generate thumbnail:', error)
+        console.error('Upload failed:', error)
         onVideoUpload({ 
-          id: Date.now().toString(), // Generate a unique id
+          id: Date.now().toString(), 
           name: file.name, 
           url: URL.createObjectURL(file), 
           thumbnailUrl: '' 
         })
       }
     }
-    setUrl("")
   }, [onVideoUpload])
 
   const handleClick = () => {
@@ -89,7 +96,7 @@ export function VideoUpload({ onVideoUpload }: VideoUploadProps) {
   }
 
   return (
-    <>
+    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
       <input
         type="file"
         ref={fileInputRef}
@@ -97,10 +104,9 @@ export function VideoUpload({ onVideoUpload }: VideoUploadProps) {
         accept="video/*"
         className="hidden"
       />
-      <Button onClick={handleClick}>
+      <Button onClick={handleClick} className="w-full sm:w-auto">
         <Upload className="mr-2 h-4 w-4" /> Upload Video
       </Button>
-    </>
+    </div>
   )
 }
-

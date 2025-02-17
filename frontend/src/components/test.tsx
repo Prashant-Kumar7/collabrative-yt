@@ -35,11 +35,14 @@ export function TestApp() {
     allowChat: false,
     allowVideoControls: false,
   })
+  const [seeking, setSeeking] = useState(true)
+  const [username, setUsername] = useState("")
   // const [roomState, setRoomState] = useState<RoomState>({
   //   paused : false,
   //   currentTime : 0
   // })
   const {id } = useParams()
+  const bottomOfChatRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(()=>{
     console.log(videoUrl)
@@ -80,6 +83,13 @@ export function TestApp() {
   useEffect(()=>{
     console.log("participants changed ",participants)
   },[participants])
+
+  useEffect(()=>{
+    if(bottomOfChatRef.current){
+      bottomOfChatRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+}, [message])
+
 
   useEffect(() => {
     if (videoRef.current && socket) {
@@ -136,8 +146,14 @@ export function TestApp() {
             console.log("Room state achived")
             break
           case "SEEKED":
+            if(username !== parsedMessage.username){
+              setSeeking(false)
+            }else{
+              setSeeking(true)
+            }
             videoRef.current.currentTime = parsedMessage.payload;
-            console.log("Seeked to:", parsedMessage.payload);
+
+            console.log("Seeked to:", parsedMessage);
             break;
           case "PAUSE":
             videoRef.current.pause();
@@ -164,6 +180,7 @@ export function TestApp() {
           case "VIDEO_URL" : 
             videoRef.current.src = parsedMessage.payload + "/720p.mp4"
             setVideoUrl(parsedMessage.payload)
+            setUsername(parsedMessage.username)
             break
           case "PARTICIPANTS" : 
             setParticipants(parsedMessage.payload)
@@ -198,17 +215,30 @@ export function TestApp() {
   };
 
   const handleSeek = () => {
-    if (socket && videoRef.current && (host || permissions.allowVideoControls)) {
-      socket.send(
+    if (seeking) {
+      socket?.send(
         JSON.stringify({
           type: "SEEKED",
           roomId: roomId,
-          payload: videoRef.current.currentTime,
-          roomToken : localStorage.getItem("room-token")
+          payload: videoRef.current?.currentTime,
+          roomToken : localStorage.getItem("room-token"),
+          username : username
         })
       );
-      console.log("Seeked to:", videoRef.current.currentTime);
+      console.log("Seeked to:", videoRef.current?.currentTime);
     }
+    // else if(socket && videoRef.current && host){
+    //   socket.send(
+    //     JSON.stringify({
+    //       type: "SEEKED",
+    //       roomId: roomId,
+    //       payload: videoRef.current.currentTime,
+    //       roomToken : localStorage.getItem("room-token"),
+    //       username : username
+    //     })
+    //   );
+    //   console.log("Seeked to:", videoRef.current.currentTime);
+    // }
   };
 
   const handleUserInteraction = () => {
@@ -233,9 +263,9 @@ export function TestApp() {
   }
 
   return (
-    <div className="grid grid-cols-12 text-white w-screen bg-zinc-950 h-screen p-10">
-        <div className="col-span-9">
-        <div className="col-span-9 h-[40rem] border">
+    <div style={{backgroundColor : "#100f0f"}} className="grid grid-cols-12 text-white w-screen  min-h-screen p-6 overflow-x-hidden">
+        <div className="col-span-12 md:col-span-9 sm:col-span-12">
+        <div className="col-span-9 sm:h-72 md:h-[40rem] border sm:border">
         {false ? (
             <div
             className="interaction-overlay h-full w-full flex justify-center items-center  bg-black bg-opacity-50 text-white text-xl"
@@ -252,37 +282,37 @@ export function TestApp() {
         muted
         onLoadedData={handlePlayerLoad}
         // onLoad={()=>console.log("video player loaded")}
-        className="video w-full h-full bg-zinc-950"
+        className="video w-full h-48 sm:h-full md:h-full bg-zinc-950"
         controls={host || permissions.allowVideoControls}
         // controls
       />
         )}
         </div>
-        <div className="w-full h-[5rem] flex justify-evenly items-center">
+        <div className="sm:w-full h-[5rem] flex justify-evenly items-center">
           <button onClick={handleResolutionChange} value={"/360p.mp4"} className="bg-zinc-900 hover:bg-zinc-950 px-8 rounded-md py-1 hover:cursor-pointer">360p</button>
           <button onClick={handleResolutionChange} value={"/480p.mp4"} className="bg-zinc-900 hover:bg-zinc-950 px-8 rounded-md py-1 hover:cursor-pointer">480p</button>
           <button onClick={handleResolutionChange} value={"/720p.mp4"} className="bg-zinc-900 hover:bg-zinc-950 px-8 rounded-md py-1 hover:cursor-pointer">720p</button>
         </div>
         </div>
-        <div className="flex flex-col grid grid-rows-12 col-span-3 ml-4">
-            <div className="grid row-span-1 grid-cols-2 w-full flex items-center h-full gap-4">
-                <button onClick={()=>setToggle(false)} className="col-span-1 text-center bg-zinc-900 hover:bg-zinc-950 py-2 hover:cursor-pointer rounded-lg">Live Chat</button>
+        <div className="flex flex-col grid grid-rows-12 col-span-12 sm:col-span-12 md:col-span-3 ml-4">
+            <div className="grid row-span-1 grid-cols-2 w-full flex items-center h-full">
+                <button onClick={()=>setToggle(false)} className="col-span-1 focus:bg-slate-300 text-center focus:text-gray-950 bg-zinc-900 hover:bg-zinc-950 border py-2 focus:outline-none hover:cursor-pointer border-0 rounded-none">Live Chat</button>
                 {/* <button  className="col-span-1 text-center bg-zinc-900 hover:bg-zinc-950 py-2 hover:cursor-pointer rounded-lg">Chats</button> */}
-                <button onClick={()=>setToggle(true)} className="col-span-1 text-center bg-zinc-900 hover:bg-zinc-950 py-2 hover:cursor-pointer rounded-lg">Participants</button>
+                <button onClick={()=>setToggle(true)} className="col-span-1 text-center focus:bg-slate-300 focus:text-gray-950 bg-zinc-900 hover:bg-zinc-950 py-2 hover:cursor-pointer focus:outline-none border-0 rounded-none">Participants</button>
             </div>
             <div className="row-span-11 grid grid-rows-12">
-              <div className="h-full flex flex-col w-full row-span-11 border">
-                {toggle? participants.map((user)=>{
-                  return <span>{user.username}</span>
-                }) : messages.map((message)=>{
-                  return <span>{message}</span>
+              <div className="h-[26rem] sm:h-[38rem] overflow-y-auto flex flex-col w-full bg-zinc-800 row-span-11">
+                {toggle? participants.map((user, index)=>{
+                  return <span ref={index+1===participants.length? bottomOfChatRef : ""}>{user.username}</span>
+                }) : messages.map((message,index)=>{
+                  return <span ref={index+1===participants.length? bottomOfChatRef : ""}>{message}</span>
                 })}
               </div>
-              <div className="row-span-11 border flex">
+              <div className="row-span-11 bg-zinc-900 flex">
                 <input disabled={host? false : permissions.allowChat? false : true} value={message} onChange={(e)=>{
                   setMessage(e.target.value)
-                }} className="w-full h-full pl-2 rounded-md" placeholder="enter text" type="text" />
-                <button onClick={handleSendMessage} className="p-1">send</button>
+                }} className="w-full h-full pl-2 rounded-md border-0 bg-zinc-900 focus:outline-none" placeholder="enter text" type="text" />
+                <button onClick={handleSendMessage} className="p-1 focus:outline-none">send</button>
               </div>
             </div>
         </div>
